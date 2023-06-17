@@ -82,6 +82,7 @@ class DecodingOptions:
 
     # language that the audio is in; uses detected language if None
     language: Optional[str] = None
+    dest_lang: Optional[str] = None
 
     # sampling-related options
     temperature: float = 0.0
@@ -506,11 +507,18 @@ class DecodingTask:
 
     def __init__(self, model: "Whisper", options: DecodingOptions):
         self.model = model
-
-        language = options.language or "en"
+        # print(options)
+        task = options.task
+        if 'translate' == options.task :
+            language = options.dest_lang or "en"
+            if language != 'en':
+                task = 'transcribe'
+        else:
+            language = options.language or "en"
+        
         tokenizer = get_tokenizer(
-            model.is_multilingual, language=language, task=options.task
-        )
+            model.is_multilingual, language=language, task=task)
+        
         self.tokenizer: Tokenizer = tokenizer
         self.options: DecodingOptions = self._verify_options(options)
 
@@ -752,7 +760,7 @@ class DecodingTask:
         avg_logprobs: List[float] = [
             lp / (len(t) + 1) for t, lp in zip(tokens, sum_logprobs)
         ]
-
+        
         fields = (
             texts,
             languages,
