@@ -71,14 +71,15 @@ def format_timestamp(
 class ResultWriter:
     extension: str
 
-    def __init__(self, output_dir: str):
+    def __init__(self, output_dir: str, language: str):
         self.output_dir = output_dir
+        self.language = language
 
     def __call__(self, result: dict, audio_path: str, options: dict):
         audio_basename = os.path.basename(audio_path)
         audio_basename = os.path.splitext(audio_basename)[0]
         output_path = os.path.join(
-            self.output_dir, audio_basename + "." + self.extension
+            self.output_dir, audio_basename + "." + self.language + "." + self.extension
         )
 
         with open(output_path, "w", encoding="utf-8") as f:
@@ -236,7 +237,7 @@ class WriteJSON(ResultWriter):
 
 
 def get_writer(
-    output_format: str, output_dir: str
+    output_format: str, output_dir: str, language:str 
 ) -> Callable[[dict, TextIO, dict], None]:
     writers = {
         "txt": WriteTXT,
@@ -247,7 +248,7 @@ def get_writer(
     }
 
     if output_format == "all":
-        all_writers = [writer(output_dir) for writer in writers.values()]
+        all_writers = [writer(output_dir, language) for writer in writers.values()]
 
         def write_all(result: dict, file: TextIO, options: dict):
             for writer in all_writers:

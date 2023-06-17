@@ -437,10 +437,13 @@ def cli():
         torch.set_num_threads(threads)
 
     from . import load_model
+    target_language = args["language"]
+    if args["task"] == "translate":
+        target_language = args["dest_lang"]
 
     model = load_model(model_name, device=device, download_root=model_dir)
 
-    writer = get_writer(output_format, output_dir)
+    writer = get_writer(output_format, output_dir, target_language)
     word_options = ["highlight_words", "max_line_count", "max_line_width"]
     if not args["word_timestamps"]:
         for option in word_options:
